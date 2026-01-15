@@ -1,0 +1,45 @@
+>>> from django.contrib.auth.models import User
+>>> from news.models import *
+>>> u1 = User.objects.create_user('Ivanov')
+>>> u2 = User.objects.create_user('Petrov')
+>>> a1 = Author.objects.create(user=u1)
+>>> a2 = Author.objects.create(user=u2)
+>>> c1 = Category.objects.create(name='IT')
+>>> c2 = Category.objects.create(name='Science')
+>>> c3 = Category.objects.create(name='Sport')
+>>> c4 = Category.objects.create(name='Politics')
+>>> p1 = Post.objects.create(author=a1, type='AR', title='Python is Great', text='Long text about coding and why Python is the best language for beginners.')
+>>> p2 = Post.objects.create(author=a1, type='AR', title='Space Exploration', text='Long text about stars, planets and how we are going to Mars.')
+>>> p3 = Post.objects.create(author=a2, type='NW', title='Local Match', text='Short news about football. Our team won with score 3:0!')
+>>> p1.categories.add(c1, c2) # Первая статья — это IT и Наука
+>>> p2.categories.add(c2)     # Вторая — только Наука
+>>> p3.categories.add(c3)     # Третья — только Спорт
+>>> com1 = Comment.objects.create(post=p1, user=u2, text='Very informative! Thanks for sharing.')
+>>> com2 = Comment.objects.create(post=p1, user=u1, text='Glad you liked it, buddy.')
+>>> com3 = Comment.objects.create(post=p2, user=u2, text='I love space, but this is a bit too scientific for me.')
+>>> com4 = Comment.objects.create(post=p3, user=u1, text='Who won the match? I missed the end!')
+>>> # Лайкаем посты
+>>> p1.like()      # рейтинг станет 1
+>>> p1.like()      # рейтинг станет 2
+>>> p2.like()      # рейтинг станет 1
+>>> p3.dislike()   # рейтинг станет -1
+>>>
+>>> # Лайкаем комментарии
+>>> com1.like()    # рейтинг станет 1
+>>> com1.like()    # рейтинг станет 2
+>>> com3.like()    # рейтинг станет 1
+>>> com4.dislike() # рейтинг станет -1
+>>> a1.update_rating()
+>>> a2.update_rating()
+>>> best_a = Author.objects.order_by('-rating').first()
+>>> print(f"Лучший автор: {best_a.user.username}, Рейтинг: {best_a.rating}")
+Лучший автор: Ivanov, Рейтинг: 11
+>>> best_p = Post.objects.order_by('-rating').first()
+>>> print(f"Дата: {best_p.time_in}, Автор: {best_p.author.user.username}, Рейтинг: {best_p.rating}, Заголовок: {best_p.title}, Превью: {best_p.preview()}")
+Дата: 2026-01-15 18:18:11.349368+00:00, Автор: Ivanov, Рейтинг: 2, Заголовок: Python is Great, Превью: Long text about coding and why Python is the best language for beginners....
+>>> comments = Comment.objects.filter(post=best_p)
+>>> for c in comments:
+...     print(f"Дата: {c.time_in}, Юзер: {c.user.username}, Рейтинг: {c.rating}, Текст: {c.text}")
+...
+Дата: 2026-01-15 18:20:40.485860+00:00, Юзер: Petrov, Рейтинг: 2, Текст: Very informative! Thanks for sharing.
+Дата: 2026-01-15 18:20:40.490724+00:00, Юзер: Ivanov, Рейтинг: 0, Текст: Glad you liked it, buddy.
