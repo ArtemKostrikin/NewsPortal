@@ -1,0 +1,65 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+<h1>Поиск новостей</h1>
+
+{# Форма фильтрации #}
+<form action="" method="get">
+    {{ filterset.form.as_p }}
+    <input type="submit" value="Найти" />
+</form>
+
+<hr>
+
+{# Список результатов - используем page_obj вместо search_results #}
+{% if page_obj %}
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th style="padding: 10px; border: 1px solid #ddd;">Заголовок</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Дата публикации</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Превью</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in page_obj %}
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        <a href="{% url 'news_detail' post.id %}">{{ post.title }}</a>
+                    </td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ post.time_in|date:'d.M.Y' }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ post.text|truncatechars:20 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <h2>Ничего не найдено! Попробуйте изменить параметры поиска.</h2>
+{% endif %}
+
+{# Навигация по страницам (Пагинация) #}
+<div style="margin-top: 20px;">
+    {% if page_obj.has_previous %}
+        {# Ссылка на первую страницу #}
+        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">1</a>
+
+        {% if page_obj.previous_page_number != 1 %}
+            ...
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
+    {% endif %}
+
+    {# Текущая страница #}
+    <span style="font-weight: bold; padding: 0 10px;">{{ page_obj.number }}</span>
+
+    {% if page_obj.has_next %}
+        {# Ссылка на следующую страницу #}
+        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+
+        {% if page_obj.paginator.num_pages != page_obj.next_page_number %}
+            ...
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock content %}

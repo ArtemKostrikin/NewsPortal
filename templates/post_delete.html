@@ -1,0 +1,12 @@
+# (Этот файл нужно создать в папке шаблонов)
+# {% extends 'flatpages/default.html' %}
+# {% block content %}
+# <h1>Удалить новость?</h1>
+# <hr>
+# <form action="" method="post">
+#     {% csrf_token %}
+#     <p>Вы уверены, что хотите удалить "{{ object.title }}"?</p>
+#     <input type="submit" value="Подтвердить удаление" />
+#     <a href="{% url 'news_list' %}">Отмена</a>
+# </form>
+# {% endblock content %}
