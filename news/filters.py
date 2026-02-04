@@ -1,7 +1,7 @@
 from django_filters import FilterSet, DateTimeFilter, CharFilter, ModelChoiceFilter
+from django import forms
 from django.forms import DateTimeInput
-from .models import Post, Author
-
+from .models import Post, Author, Category
 
 class PostFilter(FilterSet):
     title = CharFilter(
@@ -17,6 +17,7 @@ class PostFilter(FilterSet):
         empty_label='Все авторы'
     )
 
+
     added_after = DateTimeFilter(
         field_name='time_in',
         lookup_expr='gt',
@@ -27,23 +28,19 @@ class PostFilter(FilterSet):
         ),
     )
 
-
-from django import forms
-from .models import Post
-
-
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
+
         fields = [
             'author',
-            'category',
+            'categories',
             'title',
             'text',
         ]
         labels = {
             'author': 'Автор',
-            'category': 'Категория',
+            'categories': 'Категории',
             'title': 'Заголовок',
             'text': 'Текст статьи/новости',
         }

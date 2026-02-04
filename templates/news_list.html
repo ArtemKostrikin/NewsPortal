@@ -1,0 +1,30 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+    <h1>Все новости</h1>
+
+    {# Ссылка для входа в группу авторов, если пользователь еще не там #}
+    {% if not is_author %}
+        <button> <a href="{% url 'upgrade' %}"> Стать автором! </a> </button>
+    {% endif %}
+
+    <hr>
+    {% if news %}
+        <table>
+            <tr>
+                <td>Заголовок</td>
+                <td>Дата</td>
+                <td>Превью</td>
+            </tr>
+            {% for post in news %}
+            <tr>
+                <td>{{ post.title }}</td>
+                <td>{{ post.dateCreation|date:'d.M.Y' }}</td>
+                <td>{{ post.text|truncatechars:20 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>Новостей нет!</h2>
+    {% endif %}
+{% endblock content %}
