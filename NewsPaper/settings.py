@@ -70,7 +70,7 @@ DATABASES = {
     }
 }
 
-# --- Валидация паролей ---
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -78,25 +78,22 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# --- Интернационализация ---
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# --- Статика ---
+
 STATIC_URL = 'static/'
-# Проверка существования папки, чтобы не было Warning (staticfiles.W004)
+
 STATIC_PATH = os.path.join(BASE_DIR, 'static')
 if not os.path.exists(STATIC_PATH):
     os.makedirs(STATIC_PATH)
 
 STATICFILES_DIRS = [STATIC_PATH]
 
-# --- Поля моделей ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- Аутентификация ---
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -105,15 +102,16 @@ AUTHENTICATION_BACKENDS = [
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# --- Настройки Allauth (Обновленные) ---
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-# В новых версиях allauth вместо USERNAME_REQUIRED используется список полей регистрации
 ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
 
 ACCOUNT_FORMS = {
     'signup': 'news.forms.CommonSignupForm',
 }
+SITE_URL = 'http://127.0.0.1:8000'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'your_email@yandex.ru'
