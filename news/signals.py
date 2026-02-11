@@ -1,32 +1,11 @@
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.conf import settings
 from .models import PostCategory
-
-
-def send_notifications(preview, pk, title, subscribers):
-    html_content = render_to_string(
-        'post_created_email.html',
-        {
-            'text': preview,
-            'link': f'{settings.SITE_URL}/news/{pk}'
-        }
-    )
-
-    msg = EmailMultiAlternatives(
-        subject=title,
-        body='',
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=subscribers,
-    )
-    msg.attach_alternative(html_content, "text/html")
-    msg.send()
-
+from .tasks import send_notifications_task
 
 @receiver(m2m_changed, sender=PostCategory)
 def notify_about_new_post(sender, instance, **kwargs):
+    # 'post_add' срабатывает, когда через админку или форму добавили категории к посту
     if kwargs['action'] == 'post_add':
         categories = instance.categories.all()
         subscribers_emails = []
@@ -38,4 +17,10 @@ def notify_about_new_post(sender, instance, **kwargs):
         subscribers_emails = list(set(subscribers_emails))
 
         if subscribers_emails:
-            send_notifications(instance.preview(), instance.pk, instance.title, subscribers_emails)
+            # Вызываем задачу Celery. Сама функция отработает в фоне
+            send_notifications_task.delay(
+                instance.preview(),
+                instance.pk,
+                instance.title,
+                subscribers_emails
+            )

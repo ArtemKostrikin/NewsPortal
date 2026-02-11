@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -70,48 +71,47 @@ DATABASES = {
     }
 }
 
+# --- Настройки почты ---
+# Включаем консоль для тестов, чтобы письма летели в терминал
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'your_email@yandex.ru'
+SITE_URL = 'http://127.0.0.1:8000'
 
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
+# --- Celery ---
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Moscow' # Поменял на Москву для удобства расписания
 
+# --- Расписание Celery Beat ---
+CELERY_BEAT_SCHEDULE = {
+    'action_every_monday_8am': {
+        'task': 'news.tasks.weekly_newsletter', # Путь к твоей задаче
+        'schedule': crontab(hour=8, minute=0, day_of_week='monday'),
+    },
+}
+
+# Оставшиеся стандартные настройки
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
-
-
 STATIC_URL = 'static/'
-
 STATIC_PATH = os.path.join(BASE_DIR, 'static')
 if not os.path.exists(STATIC_PATH):
     os.makedirs(STATIC_PATH)
-
 STATICFILES_DIRS = [STATIC_PATH]
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
-
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-
-ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
-
-ACCOUNT_FORMS = {
-    'signup': 'news.forms.CommonSignupForm',
-}
-SITE_URL = 'http://127.0.0.1:8000'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'your_email@yandex.ru'
+ACCOUNT_FORMS = {'signup': 'news.forms.CommonSignupForm'}
